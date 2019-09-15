@@ -1,7 +1,7 @@
 {
-    "name": "Getting Started Example",
+    "name": "Youtube Music Lyrics Overlay",
     "version": "1.0",
-    "description": "Build an Extension!",
+    "description": "Shows song lyrics above album art for Youtube Music",
     "manifest_version": 2,
     "permissions": [
         "activeTab"
