@@ -4,7 +4,9 @@
     "description": "Shows song lyrics above album art for Youtube Music",
     "manifest_version": 2,
     "permissions": [
-        "activeTab"
+        "activeTab",
+        "*://*.genius.com/*",
+        "*://genius.com/*"
     ],
     "content_scripts": [
         {
@@ -16,5 +18,10 @@
                 "js/contentScript.js"
             ]
         }
-    ]
+    ],
+    "background": {
+        "scripts": [
+            "js/background.js"
+        ]
+    }
 }

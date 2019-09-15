@@ -1,72 +1,14 @@
 
-const debugText = `
-start
-
-fghjkdhgjkdfhgjkdfhgoiurifihfihifoghifoihoifjoirtu9ourtoiftzigfhiö
-jkdjfghjkdfhgdfg
-jkgdfhgjkdf
-jdgfkhkdfjg
-ndfgjkdfjkg
-
-fghjkdhgjkdfhgjkdfhg
-jkdjfghjkdfhgdfg
-jkgdfhgjkdf
-jdgfkhkdfjg
-ndfgjkdfjkg
-
-fghjkdhgjkdfhgjkdfhg
-jkdjfghjkdfhgdfg
-jkgdfhgjkdf
-jdgfkhkdfjg
-ndfgjkdfjkg
-
-fghjkdhgjkdfhgjkdfhg
-jkdjfghjkdfhgdfg
-jkgdfhgjkdf
-jdgfkhkdfjg
-ndfgjkdfjkg
-
-fghjkdhgjkdfhgjkdfhg
-jkdjfghjkdfhgdfg
-jkgdfhgjkdf
-jdgfkhkdfjg
-ndfgjkdfjkg
+const lyricsPreSuffix = `
 
 
-fghjkdhgjkdfhgjkdfhg
-jkdjfghjkdfhgdfg
-jkgdfhgjkdf
-jdgfkhkdfjg
-ndfgjkdfjkg
-
-fghjkdhgjkdfhgjkdfhg
-jkdjfghjkdfhgdfg
-jkgdfhgjkdf
-jdgfkhkdfjg
-ndfgjkdfjkg
-
-fghjkdhgjkdfhgjkdfhg
-jkdjfghjkdfhgdfg
-jkgdfhgjkdf
-jdgfkhkdfjg
-ndfgjkdfjkg
-
-fghjkdhgjkdfhgjkdfhg
-jkdjfghjkdfhgdfg
-jkgdfhgjkdf
-jdgfkhkdfjg
-ndfgjkdfjkg
 
 
-fghjkdhgjkdfhgjkdfhg
-jkdjfghjkdfhgdfg
-jkgdfhgjkdf
-jdgfkhkdfjg
-ndfgjkdfjkg
 
-
-done
 `;
+
+const clientAccessToken = '-G8w_neYOP-x1vqIf31GpQjeFb8zZ0PKnypsCCBOW4YKMuAChChWY0wFfAEU2k3K';
+const baseSearchUrl = 'https://api.genius.com/search?q=';
 
 const addOverlayElement = (): HTMLElement => {
     const playerElement: HTMLElement = document.getElementById('player');
@@ -108,7 +50,6 @@ const addLyricsElement = (parent: HTMLElement): HTMLElement => {
     lyricsTextElement.style.display = 'block';
     lyricsTextElement.style.height = 'auto';
     lyricsTextElement.style.width = '100%';
-    lyricsTextElement.textContent = debugText;
     parent.appendChild(lyricsTextElement);
 
     return lyricsTextElement;
@@ -131,6 +72,7 @@ const addShowLyricsButton = (): HTMLElement => {
 };
 
 const main = () => {
+
     const overlay = addOverlayElement();
     const lyricsTextElement = addLyricsElement(overlay);
     const lyricsButton = addShowLyricsButton();
@@ -167,9 +109,29 @@ const main = () => {
         }
     };
 
-    const loadLyrics = (songName: string, artistName: string) => {
-        lyricsTextElement.textContent = '';
+    const loadLyrics = async (songName: string, artistName: string) => {
+        lyricsTextElement.textContent = lyricsPreSuffix + 'Loading...' + lyricsPreSuffix;
         console.log('song changed: ' + artistName + ' - ' + songName);
+        lyricsTextElement.innerHTML = 'Loading';
+        const response = await (await fetch(baseSearchUrl+artistName+''+songName, { headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + clientAccessToken
+        }})).json();
+
+        try {
+            const bestHit = response.response.hits.find((hit) => {
+                return songName.toLowerCase().includes(hit.result.title.toLowerCase())
+                    || songName.toLowerCase() === hit.result.title.toLowerCase();
+            });
+            const pathSuffix: string = bestHit.result.path;
+
+            chrome.runtime.sendMessage({contentScriptQuery: 'queryLyrics', pathSuffix: pathSuffix}, (lyrics) => {
+                lyricsTextElement.innerHTML = lyricsPreSuffix + lyrics + lyricsPreSuffix;
+            });
+        } catch (e) {
+            lyricsTextElement.textContent = lyricsPreSuffix +'Error... :(' + lyricsPreSuffix;
+        }
+
     };
 
     let currentSongName = '';
@@ -199,12 +161,10 @@ const main = () => {
         attributes: true,
         // characterData: true,
         // childList: true,
-         subtree: true,
+         subtree: true
         // attributeOldValue: true,
         // characterDataOldValue: true
     });
-
-
 
 };
 
