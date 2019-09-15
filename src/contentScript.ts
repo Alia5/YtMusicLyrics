@@ -114,9 +114,28 @@ const addLyricsElement = (parent: HTMLElement): HTMLElement => {
     return lyricsTextElement;
 };
 
+const addShowLyricsButton = (): HTMLElement => {
+    const topButtons = document.getElementsByClassName('top-row-buttons')[0];
+    const minimizeButton = document.getElementsByClassName('player-minimize-button')[0];
+    const showHideLyricsButton = minimizeButton.cloneNode(true);
+
+    (<HTMLElement>showHideLyricsButton).classList.remove('player-minimize-button');
+    (<HTMLElement>showHideLyricsButton).title = 'Show/Hide Lyrics';
+    (<HTMLElement>showHideLyricsButton).setAttribute('aria-label', 'Show/Hide Lyrics');
+    const paths = (<HTMLElement>showHideLyricsButton).getElementsByTagName('path');
+    paths[0].setAttribute('d', 'M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z');
+    paths[1].setAttribute('d', 'M0 0h24v24H0z');
+
+    topButtons.insertBefore(showHideLyricsButton,minimizeButton);
+    return showHideLyricsButton as HTMLElement;
+};
+
 const main = () => {
     const overlay = addOverlayElement();
     const lyricsTextElement = addLyricsElement(overlay);
+    setTimeout(() => {
+        const lyricsButton = addShowLyricsButton();
+    }, 5000);
 };
 
 main();
