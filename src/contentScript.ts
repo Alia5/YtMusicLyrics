@@ -123,19 +123,89 @@ const addShowLyricsButton = (): HTMLElement => {
     (<HTMLElement>showHideLyricsButton).title = 'Show/Hide Lyrics';
     (<HTMLElement>showHideLyricsButton).setAttribute('aria-label', 'Show/Hide Lyrics');
     const paths = (<HTMLElement>showHideLyricsButton).getElementsByTagName('path');
-    paths[0].setAttribute('d', 'M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z');
-    paths[1].setAttribute('d', 'M0 0h24v24H0z');
-
     topButtons.insertBefore(showHideLyricsButton,minimizeButton);
+    // set paths after element is inserted, otherwise they don't apply (o.O)
+    paths[1].setAttribute('d', 'M0 0h24v24H0z');
+    paths[0].setAttribute('d', 'M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z');
     return showHideLyricsButton as HTMLElement;
 };
 
 const main = () => {
     const overlay = addOverlayElement();
     const lyricsTextElement = addLyricsElement(overlay);
-    setTimeout(() => {
-        const lyricsButton = addShowLyricsButton();
-    }, 5000);
+    const lyricsButton = addShowLyricsButton();
+
+    const playerElement: HTMLElement = document.getElementById('player');
+    const mediaControls = playerElement.getElementsByClassName('song-media-controls')[0];
+
+    let isShown = false;
+    const onLyricsButtonClick = () => {
+        // click on the playerlement to make playback continue;
+        // otherwise playback pauses when playing
+        // this has no noticeable side-effects
+        playerElement.click();
+
+        overlay.remove();
+        if (isShown) {
+            mediaControls.insertBefore(overlay, mediaControls.childNodes[0]);
+            overlay.style.zIndex = '0';
+        } else {
+            playerElement.insertBefore(overlay, document.getElementById('error-wrapper'));
+            overlay.style.zIndex = '999';
+        }
+        isShown = !isShown;
+    };
+    lyricsButton.onclick = onLyricsButtonClick;
+
+    window.onmousemove = (event: MouseEvent) => {
+        if (isShown) {
+            if (event.clientY - overlay.getClientRects()[0].top < 60) {
+                overlay.style.zIndex = '0';
+            } else {
+                overlay.style.zIndex = '999';
+            }
+        }
+    };
+
+    const loadLyrics = (songName: string, artistName: string) => {
+        lyricsTextElement.textContent = '';
+        console.log('song changed: ' + artistName + ' - ' + songName);
+    };
+
+    let currentSongName = '';
+    let currentArtistName = '';
+    const mutationObserver = new MutationObserver((mutations: MutationRecord[]) => {
+        mutations.forEach((mutation: MutationRecord) => {
+            try {
+                if (mutation.type === 'attributes'
+                && (mutation.target as HTMLElement).tagName.toLowerCase() === 'yt-formatted-string') {
+                    const songName = (document.getElementsByClassName('content-info-wrapper')[0]
+                                        .children[0].firstElementChild as HTMLSpanElement).innerText;
+                    const artistName = document.getElementsByClassName('content-info-wrapper')[0]
+                                        .children[1].getElementsByTagName('a')[0].innerText;
+                    if (songName !== currentSongName || artistName !== currentArtistName) {
+                        currentSongName = songName;
+                        currentArtistName = artistName;
+                        loadLyrics(songName, artistName);
+                    }
+                }
+            } catch (e) {
+                // ..ignore
+            }
+        });
+      });
+
+    mutationObserver.observe(document.getElementsByClassName('content-info-wrapper')[0], {
+        attributes: true,
+        // characterData: true,
+        // childList: true,
+         subtree: true,
+        // attributeOldValue: true,
+        // characterDataOldValue: true
+    });
+
+
+
 };
 
 main();
