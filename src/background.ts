@@ -24,7 +24,7 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
             try {
                 const testText = await lyricsResponse.text();
                 const testContentText = htmlDecode(testText.match(/<\/script>(\s*)?(\s*)<meta content=\"(.*)\"/)[3]);
-                const testLyrics = testContentText.match(/html\":\"<p>(.*?)<\/p>/)[1].replace(/\\n/g, '').replace(/<a(.*?)>/g, '').replace(/<\/a>/g, '');
+                const testLyrics = testContentText.match(/html\":\"<p>(.*?)<\/p>/)[1].replace(/\\n/g, '').replace(/<a(.*?)>/g, '').replace(/<\/a>/g, '').replace(/\\"/g, '"');
                 sendResponse(testLyrics);
             } catch (e) {
                 sendResponse('Error ... :( \n' + e);
