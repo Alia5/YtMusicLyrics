@@ -113,14 +113,15 @@ const main = () => {
         lyricsTextElement.textContent = lyricsPreSuffix + 'Loading...' + lyricsPreSuffix;
         console.log('song changed: ' + artistName + ' - ' + songName);
         lyricsTextElement.innerHTML = 'Loading';
-        const response = await (await fetch(baseSearchUrl+artistName+''+songName, { headers: {
+        const response = await (await fetch(baseSearchUrl+artistName+' '+songName, { headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + clientAccessToken
         }})).json();
 
         try {
-            const bestHit = response.response.hits.find((hit) => {
+            const bestHit = response.response.hits.find((hit: {[key: string]: {[key: string]: string}}) => {
                 return songName.toLowerCase().includes(hit.result.title.toLowerCase())
+                    || songName.toLowerCase().includes(hit.result.title_with_feature.toLowerCase())
                     || songName.toLowerCase() === hit.result.title.toLowerCase();
             });
             const pathSuffix: string = bestHit.result.path;
@@ -129,6 +130,7 @@ const main = () => {
                 lyricsTextElement.innerHTML = lyricsPreSuffix + lyrics + lyricsPreSuffix;
             });
         } catch (e) {
+            console.error(e, e.stack);
             lyricsTextElement.textContent = lyricsPreSuffix +'Error... :(' + lyricsPreSuffix;
         }
 
@@ -142,17 +144,18 @@ const main = () => {
                 if (mutation.type === 'attributes'
                 && (mutation.target as HTMLElement).tagName.toLowerCase() === 'yt-formatted-string') {
                     const songName = (document.getElementsByClassName('content-info-wrapper')[0]
-                                        .children[0].firstElementChild as HTMLSpanElement).innerText;
-                    const artistName = document.getElementsByClassName('content-info-wrapper')[0]
-                                        .children[1].getElementsByTagName('a')[0].innerText;
+                                        .children[0] as HTMLSpanElement).innerText;
+                    const artistName = (document.getElementsByClassName('content-info-wrapper')[0]
+                                        .children[1] as HTMLSpanElement).innerText.split(/\n/g).shift();
                     if (songName !== currentSongName || artistName !== currentArtistName) {
                         currentSongName = songName;
                         currentArtistName = artistName;
                         loadLyrics(songName, artistName);
+                        return;
                     }
                 }
             } catch (e) {
-                // ..ignore
+                console.error(e);
             }
         });
       });

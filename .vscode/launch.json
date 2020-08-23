@@ -1,0 +1,23 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Chrome against yt_music",
+            "url": "https://music.youtube.com/watch?v=0T8zj242p4o&list=RDCLAK5uy_k19tMV7eskA5MLVNIT2qYxzaiyW6Aque4",
+            "webRoot": "${workspaceFolder}"
+        },
+        {
+            "type": "chrome",
+            "request": "attach",
+            "name": "Chrome Extension debugging",
+            "port": 9222,
+            "url": "https://music.youtube.com/watch?v=_JZ60PQuzik&list=PL4cH_oiNvdmAAkEdTgRgi4dYuCiqqosA5",
+            "webRoot": "${workspaceFolder}/dist"
+        }
+    ]
+}

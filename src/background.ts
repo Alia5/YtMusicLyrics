@@ -23,9 +23,10 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
         fetch('https://genius.com' + request.pathSuffix).then(async (lyricsResponse) => {
             try {
                 const testText = await lyricsResponse.text();
-                const testContentText = htmlDecode(testText.match(/<\/script>(\s*)?(\s*)<meta content=\"(.*)\"/)[3]);
-                const testLyrics = testContentText.match(/html\":\"<p>(.*?)<\/p>/)[1].replace(/\\n/g, '').replace(/<a(.*?)>/g, '').replace(/<\/a>/g, '');
-                sendResponse(testLyrics);
+                const parser = new DOMParser();
+                const htmlDoc = parser.parseFromString(testText, 'text/html');
+                const lyricsDiv = htmlDoc.querySelector("div.lyrics");                
+                sendResponse((lyricsDiv as HTMLSpanElement).innerText);
             } catch (e) {
                 sendResponse('Error ... :( \n' + e);
             }
