@@ -144,7 +144,7 @@ const main = () => {
                 if (mutation.type === 'attributes'
                 && (mutation.target as HTMLElement).tagName.toLowerCase() === 'yt-formatted-string') {
                     const songName = (document.getElementsByClassName('content-info-wrapper')[0]
-                                        .children[0] as HTMLSpanElement).innerText;
+                                        .children[0] as HTMLSpanElement).innerText.split('(').shift();
                     const artistName = (document.getElementsByClassName('content-info-wrapper')[0]
                                         .children[1] as HTMLSpanElement).innerText.split(/\n/g).shift();
                     if (songName !== currentSongName || artistName !== currentArtistName) {
