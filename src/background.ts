@@ -25,8 +25,8 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
                 const testText = await lyricsResponse.text();
                 const parser = new DOMParser();
                 const htmlDoc = parser.parseFromString(testText, 'text/html');
-                const lyricsDiv = htmlDoc.querySelector("div.lyrics");                
-                sendResponse((lyricsDiv as HTMLSpanElement).innerText);
+                const lyrics = [ ...htmlDoc.querySelectorAll("[class^=Lyrics__Container]")].map((c) => c.innerHTML.replace(/\<br(.*?)\>/g, '\n').replace(/\<(.*)?\>/g, '')).join("\n");
+                sendResponse(lyrics);
             } catch (e) {
                 sendResponse('Error ... :( \n' + e);
             }
