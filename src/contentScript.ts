@@ -7,9 +7,6 @@ const lyricsPreSuffix = `
 
 `;
 
-const clientAccessToken = '-G8w_neYOP-x1vqIf31GpQjeFb8zZ0PKnypsCCBOW4YKMuAChChWY0wFfAEU2k3K';
-const baseSearchUrl = 'https://api.genius.com/search?q=';
-
 const addOverlayElement = (): HTMLElement => {
     const playerElement: HTMLElement = document.getElementById('player');
     const overlayElement = document.createElement('div');
@@ -113,20 +110,9 @@ const main = () => {
         lyricsTextElement.textContent = lyricsPreSuffix + 'Loading...' + lyricsPreSuffix;
         console.log('song changed: ' + artistName + ' - ' + songName);
         lyricsTextElement.innerHTML = 'Loading';
-        const response = await (await fetch(baseSearchUrl+artistName+' '+songName, { headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + clientAccessToken
-        }})).json();
 
         try {
-            const bestHit = response.response.hits.find((hit: {[key: string]: {[key: string]: string}}) => {
-                return songName.toLowerCase().includes(hit.result.title.toLowerCase())
-                    || songName.toLowerCase().includes(hit.result.title_with_feature.toLowerCase())
-                    || songName.toLowerCase() === hit.result.title.toLowerCase();
-            });
-            const pathSuffix: string = bestHit.result.path;
-
-            chrome.runtime.sendMessage({contentScriptQuery: 'queryLyrics', pathSuffix: pathSuffix}, (lyrics) => {
+            chrome.runtime.sendMessage({contentScriptQuery: 'queryLyrics', artistName: artistName, songName: songName }, (lyrics) => {
                 lyricsTextElement.innerHTML = lyricsPreSuffix + lyrics + lyricsPreSuffix;
             });
         } catch (e) {
