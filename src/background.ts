@@ -8,7 +8,7 @@ const htmlDecode = (input: string) => {
   };
 
 function strip(html: string){
-    var doc = new DOMParser().parseFromString(html, 'text/html');
+    var doc = new DOMParser().parseFromString(html.replace(/\<br(.*?)\>/g, '\n'), 'text/html');
     return doc.body.textContent || "";
  }
 
